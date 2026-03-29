@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForceNet • Fuerza Neta por Cargas Puntuales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .tailwind-config { display: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200">
+    <div id="app" class="min-h-screen">
+        <!-- Navbar -->
+        <nav class="bg-sky-600 shadow-lg">
+            <div class="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-bolt text-3xl"></i>
+                    <h1 class="text-3xl font-bold tracking-tight">ForceNet</h1>
+                    <span class="text-sky-200 text-sm font-medium px-3 py-1 bg-sky-700 rounded-full">Coulomb • 2D</span>
+                </div>
+                <div class="flex items-center gap-6 text-sm font-medium">
+                    <a href="#" class="hover:text-white transition-colors">Proyecto 1</a>
+                    <a href="#" class="hover:text-white transition-colors">Documentación</a>
+                    <a href="#" onclick="window.location.reload()" class="hover:text-white transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Reiniciar
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-8 py-8 grid grid-cols-12 gap-8">
+            <!-- Panel izquierdo: Entrada de datos -->
+            <div class="col-span-12 lg:col-span-5 space-y-8">
+                <!-- Carga objetivo -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-700 shadow-xl">
+                    <h2 class="text-xl font-semibold mb-6 flex items-center gap-3">
+                        <span class="text-emerald-400"><i class="fa-solid fa-crosshairs"></i></span>
+                        Carga Objetivo
+                    </h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Carga q₀ (C)</label>
+                            <input v-model="target.q" type="number" step="any" 
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-4 text-lg focus:outline-none focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Posición X (m)</label>
+                            <input v-model="target.x" type="number" step="any" 
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-4 text-lg focus:outline-none focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Posición Y (m)</label>
+                            <input v-model="target.y" type="number" step="any" 
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-4 text-lg focus:outline-none focus:border-sky-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agregar cargas puntuales -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-700 shadow-xl">
+                    <h2 class="text-xl font-semibold mb-6 flex items-center gap-3">
+                        <span class="text-amber-400"><i class="fa-solid fa-plus"></i></span>
+                        Agregar Cargas Puntuales
+                    </h2>
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">q (C)</label>
+                            <input v-model="newCharge.q" type="number" step="any" 
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-4">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">X (m)</label>
+                            <input v-model="newCharge.x" type="number" step="any" 
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-4">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Y (m)</label>
+                            <input v-model="newCharge.y" type="number" step="any" 
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-4">
+                        </div>
+                    </div>
+                    <button @click="addCharge" 
+                            class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-5 rounded-3xl text-lg flex items-center justify-center gap-3 transition-all active:scale-95">
+                        <i class="fa-solid fa-plus"></i>
+                        AGREGAR CARGA PUNTUAL
+                    </button>
+                </div>
+
+                <!-- Lista de cargas -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-700 shadow-xl">
+                    <h2 class="text-xl font-semibold mb-6">Cargas Puntuales ({{ charges.length }})</h2>
+                    <div v-if="charges.length === 0" class="text-slate-400 italic py-8 text-center">
+                        Aún no hay cargas. Agrega al menos una.
+                    </div>
+                    <div v-else class="max-h-96 overflow-y-auto pr-2 space-y-3">
+                        <div v-for="charge in charges" :key="charge.id"
+                             class="flex items-center justify-between bg-slate-800 rounded-2xl px-6 py-4 group">
+                            <div class="flex items-center gap-6">
+                                <div :class="charge.q > 0 ? 'text-red-400' : 'text-blue-400'">
+                                    <i class="fa-solid fa-circle-dot text-2xl"></i>
+                                </div>
+                                <div>
+                                    <span class="font-mono text-lg">{{ charge.q.toFixed(3) }} C</span>
+                                    <span class="text-slate-400 text-sm ml-6">({{ charge.x.toFixed(2) }}, {{ charge.y.toFixed(2) }}) m</span>
+                                </div>
+                            </div>
+                            <button @click="removeCharge(charge.id)"
+                                    class="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón Calcular -->
+                <button @click="calculate" :disabled="isCalculating || charges.length === 0"
+                        class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 disabled:opacity-60 text-white font-bold text-2xl py-8 rounded-3xl shadow-2xl flex items-center justify-center gap-4 transition-all active:scale-[0.97]">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span v-if="!isCalculating">CALCULAR FUERZA NETA</span>
+                    <span v-else class="flex items-center gap-3">
+                        <i class="fa-solid fa-spinner animate-spin"></i> Calculando...
+                    </span>
+                </button>
+            </div>
+
+            <!-- Panel derecho: Visualización + Resultados -->
+            <div class="col-span-12 lg:col-span-7 space-y-8">
+                <!-- Canvas de visualización -->
+                <div class="bg-slate-900 rounded-3xl p-6 border border-slate-700 shadow-2xl">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center justify-between">
+                        Visualización Gráfica
+                        <span class="text-xs bg-slate-800 px-4 py-2 rounded-3xl font-mono text-slate-400">Escala automática</span>
+                    </h2>
+                    <canvas ref="canvas" width="700" height="560" 
+                            class="w-full bg-slate-950 rounded-3xl border border-slate-700 shadow-inner"></canvas>
+                </div>
+
+                <!-- Resultados -->
+                <div v-if="results" class="bg-emerald-900/30 border border-emerald-400/30 rounded-3xl p-8">
+                    <h2 class="text-2xl font-bold text-emerald-300 mb-6">Fuerza Neta Calculada</h2>
+                    <div class="grid grid-cols-3 gap-6 text-center">
+                        <div class="bg-slate-900 rounded-3xl p-6">
+                            <div class="text-slate-400 text-sm mb-1">Componente X</div>
+                            <div class="font-mono text-5xl font-semibold text-white">{{ results.fx }} <span class="text-2xl">N</span></div>
+                        </div>
+                        <div class="bg-slate-900 rounded-3xl p-6">
+                            <div class="text-slate-400 text-sm mb-1">Componente Y</div>
+                            <div class="font-mono text-5xl font-semibold text-white">{{ results.fy }} <span class="text-2xl">N</span></div>
+                        </div>
+                        <div class="bg-slate-900 rounded-3xl p-6">
+                            <div class="text-slate-400 text-sm mb-1">Magnitud |F|</div>
+                            <div class="font-mono text-5xl font-semibold text-emerald-300">{{ results.magnitude }} <span class="text-2xl">N</span></div>
+                        </div>
+                    </div>
+                    <p class="text-center text-emerald-200 text-sm mt-8 font-medium">Vector fuerza neta: ⟨ {{ results.fx }}, {{ results.fy }} ⟩ N</p>
+                </div>
+
+                <div v-else class="bg-slate-900/50 border border-dashed border-slate-600 rounded-3xl h-72 flex items-center justify-center text-slate-400 text-xl">
+                    Los resultados aparecerán aquí después de calcular
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    target: { q: '', x: '', y: '' },
+                    newCharge: { q: '', x: '', y: '' },
+                    charges: [],
+                    nextId: 1,
+                    results: null,
+                    isCalculating: false
+                }
+            },
+            mounted() {
+                this.updateCanvas()
+            },
+            methods: {
+                addCharge() {
+                    const q = parseFloat(this.newCharge.q)
+                    const x = parseFloat(this.newCharge.x)
+                    const y = parseFloat(this.newCharge.y)
+
+                    if (isNaN(q) || isNaN(x) || isNaN(y)) {
+                        Swal.fire({ icon: 'error', title: 'Datos inválidos', text: 'Ingresa valores numéricos válidos.', confirmButtonColor: '#0ea5e9' })
+                        return
+                    }
+
+                    this.charges.push({ id: this.nextId++, q, x, y })
+                    this.newCharge = { q: '', x: '', y: '' }
+                    this.updateCanvas()
+                },
+
+                removeCharge(id) {
+                    Swal.fire({
+                        title: '¿Eliminar esta carga?',
+                        text: "No podrás revertir esta acción",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#0ea5e9',
+                        cancelButtonColor: '#f43f5e',
+                        confirmButtonText: 'Sí, eliminar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.charges = this.charges.filter(c => c.id !== id)
+                            this.updateCanvas()
+                            Swal.fire({ title: 'Eliminada', icon: 'success', confirmButtonColor: '#0ea5e9' })
+                        }
+                    })
+                },
+
+                async calculate() {
+                    if (!this.target.q || !this.target.x || !this.target.y || this.charges.length === 0) {
+                        Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Ingresa la carga objetivo y al menos una carga puntual.', confirmButtonColor: '#0ea5e9' })
+                        return
+                    }
+
+                    this.isCalculating = true
+                    try {
+                        const res = await fetch('/api/calculate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                target: this.target,
+                                charges: this.charges.map(c => ({ q: c.q, x: c.x, y: c.y }))
+                            })
+                        })
+
+                        const data = await res.json()
+
+                        if (data.success) {
+                            this.results = {
+                                fx: data.fx,
+                                fy: data.fy,
+                                magnitude: data.magnitude
+                            }
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Cálculo exitoso!',
+                                text: 'Fuerza neta obtenida correctamente',
+                                confirmButtonColor: '#0ea5e9'
+                            })
+                            this.updateCanvas()
+                        } else {
+                            throw new Error(data.error)
+                        }
+                    } catch (e) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: e.message, confirmButtonColor: '#0ea5e9' })
+                    } finally {
+                        this.isCalculating = false
+                    }
+                },
+
+                updateCanvas() {
+                    const canvas = this.$refs.canvas
+                    if (!canvas) return
+                    const ctx = canvas.getContext('2d')
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+                    // Recopilar todas las posiciones
+                    let positionsX = this.charges.map(c => c.x)
+                    let positionsY = this.charges.map(c => c.y)
+                    const tx = parseFloat(this.target.x)
+                    const ty = parseFloat(this.target.y)
+                    if (!isNaN(tx)) positionsX.push(tx)
+                    if (!isNaN(ty)) positionsY.push(ty)
+
+                    if (positionsX.length === 0) {
+                        ctx.fillStyle = '#64748b'
+                        ctx.font = '20px sans-serif'
+                        ctx.textAlign = 'center'
+                        ctx.fillText('Agrega cargas para visualizar', canvas.width/2, canvas.height/2)
+                        return
+                    }
+
+                    let minX = Math.min(...positionsX)
+                    let maxX = Math.max(...positionsX)
+                    let minY = Math.min(...positionsY)
+                    let maxY = Math.max(...positionsY)
+
+                    let rangeX = maxX - minX || 10
+                    let rangeY = maxY - minY || 10
+                    if (rangeX < 1e-5) { minX -= 5; maxX += 5; rangeX = 10 }
+                    if (rangeY < 1e-5) { minY -= 5; maxY += 5; rangeY = 10 }
+
+                    const padding = 70
+                    const plotW = canvas.width - padding * 2
+                    const plotH = canvas.height - padding * 2
+
+                    const scaleX = plotW / rangeX
+                    const scaleY = plotH / rangeY
+
+                    const toCanvasX = x => padding + (x - minX) * scaleX
+                    const toCanvasY = y => padding + (maxY - y) * scaleY   // eje Y hacia arriba
+
+                    // Grid
+                    ctx.strokeStyle = '#334155'
+                    ctx.lineWidth = 1
+                    for (let i = 0; i <= 6; i++) {
+                        const x = padding + (i * plotW / 6)
+                        ctx.beginPath(); ctx.moveTo(x, padding); ctx.lineTo(x, canvas.height - padding); ctx.stroke()
+                        const y = padding + (i * plotH / 6)
+                        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(canvas.width - padding, y); ctx.stroke()
+                    }
+
+                    // Cargas puntuales
+                    this.charges.forEach(charge => {
+                        const cx = toCanvasX(charge.x)
+                        const cy = toCanvasY(charge.y)
+                        ctx.fillStyle = charge.q > 0 ? '#f43f5e' : '#0ea5e9'
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, 18, 0, Math.PI * 2)
+                        ctx.fill()
+                        ctx.strokeStyle = '#1e2937'
+                        ctx.lineWidth = 4
+                        ctx.stroke()
+                        ctx.fillStyle = '#e2e8f0'
+                        ctx.font = '13px monospace'
+                        ctx.textAlign = 'left'
+                        ctx.fillText(charge.q.toFixed(2), cx + 25, cy - 8)
+                    })
+
+                    // Carga objetivo
+                    if (!isNaN(tx) && !isNaN(ty)) {
+                        const cx = toCanvasX(tx)
+                        const cy = toCanvasY(ty)
+                        ctx.fillStyle = '#10b981'
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, 26, 0, Math.PI * 2)
+                        ctx.fill()
+                        ctx.strokeStyle = '#1e2937'
+                        ctx.lineWidth = 6
+                        ctx.stroke()
+                        ctx.fillStyle = '#1e2937'
+                        ctx.font = 'bold 14px monospace'
+                        ctx.fillText('OBJ', cx - 12, cy + 5)
+                    }
+
+                    // Flecha de fuerza neta
+                    if (this.results && !isNaN(tx) && !isNaN(ty)) {
+                        const mag = this.results.magnitude
+                        if (mag > 0) {
+                            const cx = toCanvasX(tx)
+                            const cy = toCanvasY(ty)
+                            const ux = this.results.fx / mag
+                            const uy = this.results.fy / mag
+                            const arrowLen = 95
+
+                            const endX = cx + ux * arrowLen
+                            const endY = cy - uy * arrowLen   // flip Y
+
+                            ctx.strokeStyle = '#eab308'
+                            ctx.lineWidth = 7
+                            ctx.beginPath()
+                            ctx.moveTo(cx, cy)
+                            ctx.lineTo(endX, endY)
+                            ctx.stroke()
+
+                            // Punta de flecha
+                            const angle = Math.atan2(endY - cy, endX - cx)
+                            const head = 18
+                            ctx.beginPath()
+                            ctx.moveTo(endX, endY)
+                            ctx.lineTo(endX - head * Math.cos(angle - Math.PI / 6), endY - head * Math.sin(angle - Math.PI / 6))
+                            ctx.moveTo(endX, endY)
+                            ctx.lineTo(endX - head * Math.cos(angle + Math.PI / 6), endY - head * Math.sin(angle + Math.PI / 6))
+                            ctx.stroke()
+                        }
+                    }
+
+                    // Etiquetas ejes
+                    ctx.fillStyle = '#94a3b8'
+                    ctx.font = '15px sans-serif'
+                    ctx.textAlign = 'center'
+                    ctx.fillText('x (m)', canvas.width / 2, canvas.height - 25)
+                    ctx.save()
+                    ctx.translate(25, canvas.height / 2)
+                    ctx.rotate(-Math.PI / 2)
+                    ctx.fillText('y (m)', 0, 0)
+                    ctx.restore()
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>
