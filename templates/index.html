@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .tailwind-config { display: none; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
+
+    {% raw %}
     <div id="app" class="min-h-screen">
         <!-- Navbar -->
         <nav class="bg-sky-600 shadow-lg">
@@ -166,6 +167,7 @@
             </div>
         </div>
     </div>
+    {% endraw %}
 
     <script>
         const { createApp } = Vue
@@ -266,7 +268,6 @@
                     const ctx = canvas.getContext('2d')
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-                    // Recopilar todas las posiciones
                     let positionsX = this.charges.map(c => c.x)
                     let positionsY = this.charges.map(c => c.y)
                     const tx = parseFloat(this.target.x)
@@ -300,7 +301,7 @@
                     const scaleY = plotH / rangeY
 
                     const toCanvasX = x => padding + (x - minX) * scaleX
-                    const toCanvasY = y => padding + (maxY - y) * scaleY   // eje Y hacia arriba
+                    const toCanvasY = y => padding + (maxY - y) * scaleY
 
                     // Grid
                     ctx.strokeStyle = '#334155'
@@ -356,7 +357,7 @@
                             const arrowLen = 95
 
                             const endX = cx + ux * arrowLen
-                            const endY = cy - uy * arrowLen   // flip Y
+                            const endY = cy - uy * arrowLen
 
                             ctx.strokeStyle = '#eab308'
                             ctx.lineWidth = 7
@@ -365,7 +366,6 @@
                             ctx.lineTo(endX, endY)
                             ctx.stroke()
 
-                            // Punta de flecha
                             const angle = Math.atan2(endY - cy, endX - cx)
                             const head = 18
                             ctx.beginPath()
@@ -391,5 +391,6 @@
             }
         }).mount('#app')
     </script>
+
 </body>
 </html>
