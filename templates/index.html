@@ -16,7 +16,7 @@
 
     {% raw %}
     <div id="app" class="min-h-screen">
-        <!-- Navbar -->
+        <!-- Navbar funcional -->
         <nav class="bg-sky-600 shadow-lg">
             <div class="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -25,11 +25,18 @@
                     <span class="text-sky-200 text-sm font-medium px-3 py-1 bg-sky-700 rounded-full">Coulomb • 2D</span>
                 </div>
                 <div class="flex items-center gap-6 text-sm font-medium">
-                    <a href="#" class="hover:text-white transition-colors">Proyecto 1</a>
-                    <a href="#" class="hover:text-white transition-colors">Documentación</a>
-                    <a href="#" onclick="window.location.reload()" class="hover:text-white transition-colors flex items-center gap-2">
+                    <button @click="resetApp"
+                            class="hover:text-white transition-colors flex items-center gap-2">
+                        Proyecto 1
+                    </button>
+                    <button @click="showDocumentation"
+                            class="hover:text-white transition-colors flex items-center gap-2">
+                        Documentación
+                    </button>
+                    <button @click="restartPage"
+                            class="hover:text-white transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-rotate"></i> Reiniciar
-                    </a>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -262,132 +269,49 @@
                     }
                 },
 
-                updateCanvas() {
-                    const canvas = this.$refs.canvas
-                    if (!canvas) return
-                    const ctx = canvas.getContext('2d')
-                    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-                    let positionsX = this.charges.map(c => c.x)
-                    let positionsY = this.charges.map(c => c.y)
-                    const tx = parseFloat(this.target.x)
-                    const ty = parseFloat(this.target.y)
-                    if (!isNaN(tx)) positionsX.push(tx)
-                    if (!isNaN(ty)) positionsY.push(ty)
-
-                    if (positionsX.length === 0) {
-                        ctx.fillStyle = '#64748b'
-                        ctx.font = '20px sans-serif'
-                        ctx.textAlign = 'center'
-                        ctx.fillText('Agrega cargas para visualizar', canvas.width/2, canvas.height/2)
-                        return
-                    }
-
-                    let minX = Math.min(...positionsX)
-                    let maxX = Math.max(...positionsX)
-                    let minY = Math.min(...positionsY)
-                    let maxY = Math.max(...positionsY)
-
-                    let rangeX = maxX - minX || 10
-                    let rangeY = maxY - minY || 10
-                    if (rangeX < 1e-5) { minX -= 5; maxX += 5; rangeX = 10 }
-                    if (rangeY < 1e-5) { minY -= 5; maxY += 5; rangeY = 10 }
-
-                    const padding = 70
-                    const plotW = canvas.width - padding * 2
-                    const plotH = canvas.height - padding * 2
-
-                    const scaleX = plotW / rangeX
-                    const scaleY = plotH / rangeY
-
-                    const toCanvasX = x => padding + (x - minX) * scaleX
-                    const toCanvasY = y => padding + (maxY - y) * scaleY
-
-                    // Grid
-                    ctx.strokeStyle = '#334155'
-                    ctx.lineWidth = 1
-                    for (let i = 0; i <= 6; i++) {
-                        const x = padding + (i * plotW / 6)
-                        ctx.beginPath(); ctx.moveTo(x, padding); ctx.lineTo(x, canvas.height - padding); ctx.stroke()
-                        const y = padding + (i * plotH / 6)
-                        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(canvas.width - padding, y); ctx.stroke()
-                    }
-
-                    // Cargas puntuales
-                    this.charges.forEach(charge => {
-                        const cx = toCanvasX(charge.x)
-                        const cy = toCanvasY(charge.y)
-                        ctx.fillStyle = charge.q > 0 ? '#f43f5e' : '#0ea5e9'
-                        ctx.beginPath()
-                        ctx.arc(cx, cy, 18, 0, Math.PI * 2)
-                        ctx.fill()
-                        ctx.strokeStyle = '#1e2937'
-                        ctx.lineWidth = 4
-                        ctx.stroke()
-                        ctx.fillStyle = '#e2e8f0'
-                        ctx.font = '13px monospace'
-                        ctx.textAlign = 'left'
-                        ctx.fillText(charge.q.toFixed(2), cx + 25, cy - 8)
+                // ==================== FUNCIONES DE LA NAVBAR ====================
+                resetApp() {
+                    this.target = { q: '', x: '', y: '' }
+                    this.newCharge = { q: '', x: '', y: '' }
+                    this.charges = []
+                    this.results = null
+                    this.updateCanvas()
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Formulario reiniciado',
+                        text: 'Todos los datos han sido limpiados',
+                        confirmButtonColor: '#0ea5e9'
                     })
+                },
 
-                    // Carga objetivo
-                    if (!isNaN(tx) && !isNaN(ty)) {
-                        const cx = toCanvasX(tx)
-                        const cy = toCanvasY(ty)
-                        ctx.fillStyle = '#10b981'
-                        ctx.beginPath()
-                        ctx.arc(cx, cy, 26, 0, Math.PI * 2)
-                        ctx.fill()
-                        ctx.strokeStyle = '#1e2937'
-                        ctx.lineWidth = 6
-                        ctx.stroke()
-                        ctx.fillStyle = '#1e2937'
-                        ctx.font = 'bold 14px monospace'
-                        ctx.fillText('OBJ', cx - 12, cy + 5)
-                    }
+                showDocumentation() {
+                    Swal.fire({
+                        title: '📘 Documentación - Proyecto 1',
+                        html: `
+                            <div class="text-left max-h-96 overflow-y-auto">
+                                <h3 class="font-bold mb-3 text-lg">Fuerza Neta por Cargas Puntuales</h3>
+                                <p class="mb-4">Calculadora profesional que aplica la Ley de Coulomb en 2D.</p>
+                                <ul class="list-disc pl-5 space-y-2 text-sm">
+                                    <li>✔ Permite n cargas puntuales</li>
+                                    <li>✔ Carga objetivo con posición y magnitud</li>
+                                    <li>✔ Vector fuerza neta ⟨Fx, Fy⟩ N</li>
+                                    <li>✔ Magnitud de la fuerza neta</li>
+                                    <li>✔ Visualización gráfica en canvas con vector de fuerza</li>
+                                    <li>✔ Programación Orientada a Objetos (OOP)</li>
+                                    <li>✔ Código modular y profesional</li>
+                                </ul>
+                                <p class="mt-6 text-xs text-slate-400">Tecnologías: Flask • Vue 3 • Tailwind • SweetAlert2</p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#0ea5e9',
+                        width: '620px'
+                    })
+                },
 
-                    // Flecha de fuerza neta
-                    if (this.results && !isNaN(tx) && !isNaN(ty)) {
-                        const mag = this.results.magnitude
-                        if (mag > 0) {
-                            const cx = toCanvasX(tx)
-                            const cy = toCanvasY(ty)
-                            const ux = this.results.fx / mag
-                            const uy = this.results.fy / mag
-                            const arrowLen = 95
-
-                            const endX = cx + ux * arrowLen
-                            const endY = cy - uy * arrowLen
-
-                            ctx.strokeStyle = '#eab308'
-                            ctx.lineWidth = 7
-                            ctx.beginPath()
-                            ctx.moveTo(cx, cy)
-                            ctx.lineTo(endX, endY)
-                            ctx.stroke()
-
-                            const angle = Math.atan2(endY - cy, endX - cx)
-                            const head = 18
-                            ctx.beginPath()
-                            ctx.moveTo(endX, endY)
-                            ctx.lineTo(endX - head * Math.cos(angle - Math.PI / 6), endY - head * Math.sin(angle - Math.PI / 6))
-                            ctx.moveTo(endX, endY)
-                            ctx.lineTo(endX - head * Math.cos(angle + Math.PI / 6), endY - head * Math.sin(angle + Math.PI / 6))
-                            ctx.stroke()
-                        }
-                    }
-
-                    // Etiquetas ejes
-                    ctx.fillStyle = '#94a3b8'
-                    ctx.font = '15px sans-serif'
-                    ctx.textAlign = 'center'
-                    ctx.fillText('x (m)', canvas.width / 2, canvas.height - 25)
-                    ctx.save()
-                    ctx.translate(25, canvas.height / 2)
-                    ctx.rotate(-Math.PI / 2)
-                    ctx.fillText('y (m)', 0, 0)
-                    ctx.restore()
+                restartPage() {
+                    window.location.reload()
                 }
+                // =================================================================
             }
         }).mount('#app')
     </script>
