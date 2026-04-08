@@ -295,10 +295,10 @@
                 },
 
                 async calculate() {
-                    if (!this.target.q || !this.target.x || !this.target.y || this.charges.length === 0) {
-                        Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Ingresa la carga objetivo y al menos una carga puntual.', confirmButtonColor: '#0ea5e9' })
+                        if (this.target.q === '' || this.target.x === '' || this.target.y === '' || this.charges.length === 0) {
+                             Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Ingresa la carga objetivo y al menos una carga puntual.', confirmButtonColor: '#0ea5e9' })
                         return
-                    }
+                 }
 
                     this.isCalculating = true
                     try {
