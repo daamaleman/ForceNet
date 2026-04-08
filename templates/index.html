@@ -473,69 +473,69 @@
                         ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(this.canvasWidth - padding, y); ctx.stroke()
                     }
                     // Ejes cartesianos principales
-ctx.strokeStyle = '#94a3b8'
-ctx.lineWidth = 2
+                    ctx.strokeStyle = '#94a3b8'
+                    ctx.lineWidth = 2
 
-// Eje Y (x = 0)
-if (minX <= 0 && maxX >= 0) {
-    const axisX = toCanvasX(0)
-    ctx.beginPath()
-    ctx.moveTo(axisX, padding)
-    ctx.lineTo(axisX, this.canvasHeight - padding)
-    ctx.stroke()
-}
+                    // Eje Y (x = 0)
+                    if (minX <= 0 && maxX >= 0) {
+                        const axisX = toCanvasX(0)
+                        ctx.beginPath()
+                        ctx.moveTo(axisX, padding)
+                        ctx.lineTo(axisX, this.canvasHeight - padding)
+                        ctx.stroke()
+                    }
 
-// Eje X (y = 0)
-if (minY <= 0 && maxY >= 0) {
-    const axisY = toCanvasY(0)
-    ctx.beginPath()
-    ctx.moveTo(padding, axisY)
-    ctx.lineTo(this.canvasWidth - padding, axisY)
-    ctx.stroke()
-}
+                    // Eje X (y = 0)
+                    if (minY <= 0 && maxY >= 0) {
+                        const axisY = toCanvasY(0)
+                        ctx.beginPath()
+                        ctx.moveTo(padding, axisY)
+                        ctx.lineTo(this.canvasWidth - padding, axisY)
+                        ctx.stroke()
+                    }
 
-// Marcas y valores
-ctx.strokeStyle = '#94a3b8'
-ctx.fillStyle = '#cbd5e1'
-ctx.lineWidth = 1
-ctx.font = '11px monospace'
+                    // Marcas y valores
+                    ctx.strokeStyle = '#94a3b8'
+                    ctx.fillStyle = '#cbd5e1'
+                    ctx.lineWidth = 1
+                    ctx.font = '11px monospace'
 
 
-// Eje X
-if (minY <= 0 && maxY >= 0) {
-    const axisY = toCanvasY(0)
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'top'
+                    // Eje X
+                    if (minY <= 0 && maxY >= 0) {
+                        const axisY = toCanvasY(0)
+                        ctx.textAlign = 'center'
+                        ctx.textBaseline = 'top'
 
-    for (let valueX = axisMinX; valueX <= axisMaxX; valueX++) {
-        const x = toCanvasX(valueX)
+                        for (let valueX = axisMinX; valueX <= axisMaxX; valueX++) {
+                            const x = toCanvasX(valueX)
 
-        ctx.beginPath()
-        ctx.moveTo(x, axisY - 5)
-        ctx.lineTo(x, axisY + 5)
-        ctx.stroke()
+                            ctx.beginPath()
+                            ctx.moveTo(x, axisY - 5)
+                            ctx.lineTo(x, axisY + 5)
+                            ctx.stroke()
 
-        ctx.fillText(valueX.toString(), x, axisY + 8)
-    }
-}
+                            ctx.fillText(valueX.toString(), x, axisY + 8)
+                        }
+                    }
 
-// Eje Y
-if (minX <= 0 && maxX >= 0) {
-    const axisX = toCanvasX(0)
-    ctx.textAlign = 'right'
-    ctx.textBaseline = 'middle'
+                    // Eje Y
+                    if (minX <= 0 && maxX >= 0) {
+                        const axisX = toCanvasX(0)
+                        ctx.textAlign = 'right'
+                        ctx.textBaseline = 'middle'
 
-    for (let valueY = axisMinY; valueY <= axisMaxY; valueY++) {
-        const y = toCanvasY(valueY)
+                        for (let valueY = axisMinY; valueY <= axisMaxY; valueY++) {
+                            const y = toCanvasY(valueY)
 
-        ctx.beginPath()
-        ctx.moveTo(axisX - 5, y)
-        ctx.lineTo(axisX + 5, y)
-        ctx.stroke()
+                            ctx.beginPath()
+                            ctx.moveTo(axisX - 5, y)
+                            ctx.lineTo(axisX + 5, y)
+                            ctx.stroke()
 
-        ctx.fillText(valueY.toString(), axisX - 8, y)
-    }
-}
+                            ctx.fillText(valueY.toString(), axisX - 8, y)
+                        }
+                    }
                     // Ejes cartesianos principales
 
                     // Cargas puntuales
