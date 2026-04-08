@@ -189,18 +189,18 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 text-center">
                             <div class="bg-slate-900 rounded-3xl p-4 sm:p-6">
                                 <div class="text-slate-400 text-sm mb-1">Componente X</div>
-                                <div class="font-mono text-4xl sm:text-5xl font-semibold text-white">{{ results.fx }} <span class="text-xl sm:text-2xl">N</span></div>
+                                <div class="font-mono text-1xl sm:text-2xl font-semibold text-white break-all">{{ formatNumber(results.fx) }} <span class="text-xl sm:text-2xl">N</span></div>
                             </div>
                             <div class="bg-slate-900 rounded-3xl p-4 sm:p-6">
                                 <div class="text-slate-400 text-sm mb-1">Componente Y</div>
-                                <div class="font-mono text-4xl sm:text-5xl font-semibold text-white">{{ results.fy }} <span class="text-xl sm:text-2xl">N</span></div>
+                                <div class="font-mono text-2xl sm:text-3xl font-semibold text-white break-all">{{ formatNumber(results.fy) }} <span class="text-xl sm:text-2xl">N</span></div>
                             </div>
                             <div class="bg-slate-900 rounded-3xl p-4 sm:p-6">
                                 <div class="text-slate-400 text-sm mb-1">Magnitud |F|</div>
-                                <div class="font-mono text-4xl sm:text-5xl font-semibold text-emerald-300">{{ results.magnitude }} <span class="text-xl sm:text-2xl">N</span></div>
+                                <div class="font-mono text-2xl sm:text-3xl font-semibold text-emerald-300">{{ formatNumber(results.magnitude) }}<span class="text-xl sm:text-2xl">N</span></div>
                             </div>
                         </div>
-                        <p class="text-center text-emerald-200 text-sm mt-8 font-medium">Vector fuerza neta: ⟨ {{ results.fx }}, {{ results.fy }} ⟩ N</p>
+                        <p class="text-center text-emerald-200 text-sm mt-8 font-medium">Vector fuerza neta: ⟨ {{ formatNumber(results.fx) }}, {{ formatNumber(results.fy) }} ⟩  N</p>
                     </div>
 
                     <div v-else class="bg-slate-900/50 border border-dashed border-slate-600 rounded-3xl min-h-[200px] sm:min-h-[280px] flex items-center justify-center text-slate-400 text-lg px-6 text-center">
@@ -240,6 +240,19 @@
                 window.removeEventListener('orientationchange', this.resizeCanvas)
             },
             methods: {
+                formatNumber(value) {
+                    if (value === null || value === undefined || isNaN(value)) {
+                 return '—'
+             }
+
+                const absValue = Math.abs(value)
+
+                    if ((absValue >= 1e5 || absValue <= 1e-3) && absValue !== 0) {
+                return value.toExponential(2)
+             }
+
+                return Number(value).toFixed(3)
+        },
                 resizeCanvas() {
                     const canvas = this.$refs.canvas
                     if (!canvas) return
