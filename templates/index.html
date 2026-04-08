@@ -421,10 +421,37 @@
                     let minY = Math.min(...positionsY)
                     let maxY = Math.max(...positionsY)
 
+                    minX = Math.floor(minX)
+                    maxX = Math.ceil(maxX)
+                    minY = Math.floor(minY)
+                    maxY = Math.ceil(maxY)
+
+                    const marginX = Math.max((maxX - minX) * 0.2, 1)
+                    const marginY = Math.max((maxY - minY) * 0.2, 1)
+
+                    minX -= marginX
+                    maxX += marginX
+                    minY -= marginY
+                    maxY += marginY
+
                     let rangeX = maxX - minX || 10
                     let rangeY = maxY - minY || 10
-                    if (rangeX < 1e-5) { minX -= 5; maxX += 5; rangeX = 10 }
-                    if (rangeY < 1e-5) { minY -= 5; maxY += 5; rangeY = 10 }
+
+                    if (rangeX < 1e-5) {
+                        minX -= 5
+                        maxX += 5
+                        rangeX = 10
+                    }
+
+                    if (rangeY < 1e-5) {
+                        minY -= 5
+                        maxY += 5
+                        rangeY = 10
+                    }
+                    const axisMinX = Math.ceil(minX)
+                    const axisMaxX = Math.floor(maxX)
+                    const axisMinY = Math.ceil(minY)
+                    const axisMaxY = Math.floor(maxY)
 
                     const padding = Math.max(40, this.canvasWidth * 0.08)
                     const plotW = this.canvasWidth - padding * 2
@@ -445,6 +472,71 @@
                         const y = padding + (i * plotH / 6)
                         ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(this.canvasWidth - padding, y); ctx.stroke()
                     }
+                    // Ejes cartesianos principales
+ctx.strokeStyle = '#94a3b8'
+ctx.lineWidth = 2
+
+// Eje Y (x = 0)
+if (minX <= 0 && maxX >= 0) {
+    const axisX = toCanvasX(0)
+    ctx.beginPath()
+    ctx.moveTo(axisX, padding)
+    ctx.lineTo(axisX, this.canvasHeight - padding)
+    ctx.stroke()
+}
+
+// Eje X (y = 0)
+if (minY <= 0 && maxY >= 0) {
+    const axisY = toCanvasY(0)
+    ctx.beginPath()
+    ctx.moveTo(padding, axisY)
+    ctx.lineTo(this.canvasWidth - padding, axisY)
+    ctx.stroke()
+}
+
+// Marcas y valores
+ctx.strokeStyle = '#94a3b8'
+ctx.fillStyle = '#cbd5e1'
+ctx.lineWidth = 1
+ctx.font = '11px monospace'
+
+
+// Eje X
+if (minY <= 0 && maxY >= 0) {
+    const axisY = toCanvasY(0)
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+
+    for (let valueX = axisMinX; valueX <= axisMaxX; valueX++) {
+        const x = toCanvasX(valueX)
+
+        ctx.beginPath()
+        ctx.moveTo(x, axisY - 5)
+        ctx.lineTo(x, axisY + 5)
+        ctx.stroke()
+
+        ctx.fillText(valueX.toString(), x, axisY + 8)
+    }
+}
+
+// Eje Y
+if (minX <= 0 && maxX >= 0) {
+    const axisX = toCanvasX(0)
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'middle'
+
+    for (let valueY = axisMinY; valueY <= axisMaxY; valueY++) {
+        const y = toCanvasY(valueY)
+
+        ctx.beginPath()
+        ctx.moveTo(axisX - 5, y)
+        ctx.lineTo(axisX + 5, y)
+        ctx.stroke()
+
+        ctx.fillText(valueY.toString(), axisX - 8, y)
+    }
+}
+                    // Ejes cartesianos principales
 
                     // Cargas puntuales
                     this.charges.forEach(charge => {
