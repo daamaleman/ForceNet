@@ -87,6 +87,48 @@ ForceNet/
 2. PointCharge: entidad de carga puntual con posicion cartesiana.
 3. ForceCalculator: servicio de dominio que aplica Coulomb y suma vectorial.
 
+## 📁 Documentacion por Archivo
+
+### `app.py`
+
+1. Rol: punto de entrada del servidor Flask.
+2. Expone dos rutas:
+	- `/`: renderiza la UI.
+	- `/api/calculate`: recibe datos de cargas y responde `fx`, `fy`, `magnitude`.
+3. Valida estructura del JSON y maneja errores de entrada/singularidad.
+
+### `models.py`
+
+1. Rol: capa de dominio fisico (sin dependencias de UI).
+2. Define:
+	- `Vector2D`: vector cartesiano y magnitud.
+	- `PointCharge`: carga puntual con posicion.
+	- `ForceCalculator`: sumatoria vectorial usando ley de Coulomb.
+3. Lanza `ValueError` si dos cargas coinciden en la misma posicion (caso no acotado).
+
+### `templates/index.html`
+
+1. Rol: interfaz web reactiva (Vue 3 + Tailwind + Canvas).
+2. Permite crear escenario fisico, enviar calculo al backend y visualizar resultados.
+3. Incluye:
+	- formularios para carga objetivo y cargas puntuales,
+	- vista grafica con ejes y vector neto,
+	- feedback de UX mediante SweetAlert2.
+
+### `requirements.txt`
+
+1. Rol: congelar dependencias Python necesarias para ejecutar el backend.
+2. Uso recomendado:
+
+```bash
+pip install -r requirements.txt
+```
+
+### `README.md`
+
+1. Rol: guia principal del proyecto.
+2. Contiene instalacion, arquitectura, API, modelo fisico y flujo de uso.
+
 ## 📐 Modelo Fisico
 
 Se usa la forma vectorial:

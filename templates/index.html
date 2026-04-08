@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!--
+        Interfaz principal de ForceNet.
+        Estructura general:
+        1) Navbar con acciones rápidas.
+        2) Panel de entrada de datos (carga objetivo + cargas puntuales).
+        3) Panel de visualización en canvas y resultados numéricos.
+        4) Lógica reactiva en Vue 3 para validación, cálculo y renderizado.
+    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ForceNet • Fuerza Neta por Cargas Puntuales</title>
@@ -240,6 +248,7 @@
                 window.removeEventListener('orientationchange', this.resizeCanvas)
             },
             methods: {
+                // Da formato legible a los resultados, incluyendo notación científica.
                 formatNumber(value) {
                     if (value === null || value === undefined || isNaN(value)) {
                  return '—'
@@ -253,6 +262,7 @@
 
                 return Number(value).toFixed(3)
         },
+                // Ajusta el canvas al contenedor manteniendo proporción y nitidez (DPR).
                 resizeCanvas() {
                     const canvas = this.$refs.canvas
                     if (!canvas) return
@@ -274,6 +284,7 @@
                     this.updateCanvas()
                 },
 
+                // Agrega una carga puntual desde el formulario lateral.
                 addCharge() {
                     const q = parseFloat(this.newCharge.q)
                     const x = parseFloat(this.newCharge.x)
@@ -307,6 +318,7 @@
                     })
                 },
 
+                // Envía datos al backend y guarda la fuerza neta calculada.
                 async calculate() {
                         if (this.target.q === '' || this.target.x === '' || this.target.y === '' || this.charges.length === 0) {
                              Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Ingresa la carga objetivo y al menos una carga puntual.', confirmButtonColor: '#0ea5e9' })
@@ -393,6 +405,7 @@
                 },
                 // =================================================================
 
+                // Renderiza grilla, ejes, cargas y vector de fuerza neta.
                 updateCanvas() {
                     const canvas = this.$refs.canvas
                     if (!canvas) return
