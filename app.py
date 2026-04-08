@@ -1,12 +1,3 @@
-"""Aplicación web de ForceNet.
-
-Este módulo define:
-- La ruta principal que renderiza la interfaz.
-- El endpoint REST que recibe cargas puntuales y devuelve la fuerza neta.
-
-La lógica física no vive aquí: se delega al dominio en models.py.
-"""
-
 from flask import Flask, render_template, request, jsonify
 from models import PointCharge, ForceCalculator
 
@@ -16,24 +7,13 @@ app.config['SECRET_KEY'] = 'electroforce-secret-key'  # Para futuras expansiones
 
 @app.route('/')
 def index():
-    """Renderiza la página principal de ForceNet."""
+    """Sirve la interfaz profesional."""
     return render_template('index.html')
 
 
 @app.route('/api/calculate', methods=['POST'])
 def calculate():
-        """Calcula la fuerza neta sobre la carga objetivo.
-
-        Entrada JSON esperada:
-        {
-            "target": {"q": float, "x": float, "y": float},
-            "charges": [{"q": float, "x": float, "y": float}, ...]
-        }
-
-        Respuesta JSON:
-        - success=true con fx, fy y magnitude cuando todo es válido.
-        - success=false con error cuando la entrada es inválida.
-        """
+    """Endpoint API para calcular fuerza neta (separa lógica de presentación)."""
     try:
         data = request.get_json()
         if not data or 'target' not in data or 'charges' not in data:
@@ -42,7 +22,7 @@ def calculate():
         target_data = data['target']
         charges_data = data['charges']
 
-        # Convierte el payload en objetos de dominio tipados.
+        # Crear objetos OOP
         target = PointCharge(
             q=float(target_data['q']),
             x=float(target_data['x']),
