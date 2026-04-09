@@ -222,10 +222,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Iniciar servidor.
+4. Iniciar servidor (desarrollo).
 
 ```bash
 py .\app.py
+```
+
+Produccion con Gunicorn (Linux/macOS o contenedor):
+
+```bash
+gunicorn -w 2 -b 0.0.0.0:5000 app:app
 ```
 
 5. Abrir en navegador.
@@ -233,6 +239,22 @@ py .\app.py
 ```text
 http://127.0.0.1:5000
 ```
+
+### ☁️ Despliegue en Render
+
+Este proyecto incluye `Procfile` con:
+
+```text
+web: gunicorn app:app
+```
+
+Pasos rapidos en Render:
+
+1. Crea un nuevo **Web Service** desde tu repositorio.
+2. Runtime: **Python 3**.
+3. Build Command: `pip install -r requirements.txt`.
+4. Start Command: `gunicorn app:app`.
+5. Deploy.
 
 ## 🚀 Guia de Uso
 
